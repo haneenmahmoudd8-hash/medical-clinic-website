@@ -1,0 +1,1581 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" class="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nova Medical Clinic | Patient Portal</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        premiumDark: '#0A192F',
+                        premiumBlue: '#1E40AF',
+                        electricBlue: '#2563EB',
+                        iceBlue: '#F0F7FF',
+                        accentGold: '#D4AF37',
+                    },
+                    fontFamily: {
+                        sans: ['Plus Jakarta Sans', 'Segoe UI', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Cairo:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+        html[dir="rtl"] body {
+            font-family: 'Cairo', sans-serif;
+        }
+        .glass-header {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(37, 99, 235, 0.08);
+        }
+        .dark .glass-header {
+            background: rgba(10, 25, 47, 0.85);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        .blob-bg {
+            position: absolute;
+            filter: blur(120px);
+            z-index: 0;
+            opacity: 0.4;
+            pointer-events: none;
+        }
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #F1F5F9;
+        }
+        .dark ::-webkit-scrollbar-track {
+            background: #0F172A;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #3B82F6;
+            border-radius: 4px;
+        }
+        .btn-neon {
+            box-shadow: 0 4px 14px 0 rgba(37, 99, 235, 0.25);
+            transition: all 0.3s ease;
+        }
+        .btn-neon:hover {
+            box-shadow: 0 6px 20px 0 rgba(37, 99, 235, 0.45);
+        }
+        @keyframes pulseGlow {
+            0%, 100% { transform: scale(1); opacity: 0.4; }
+            50% { transform: scale(1.08); opacity: 0.6; }
+        }
+        .pulse-element {
+            animation: pulseGlow 4s infinite ease-in-out;
+        }
+        @keyframes slideInRight {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        .sms-toast-animation {
+            animation: slideInRight 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+    </style>
+</head>
+<body class="overflow-x-hidden text-slate-800 bg-[#FAFBFD] dark:bg-slate-950 dark:text-slate-100">
+
+    <!-- Fluid Background Blobs -->
+    <div class="blob-bg w-[400px] h-[400px] bg-blue-200 dark:bg-blue-900 top-[-100px] left-[-100px] rounded-full pulse-element"></div>
+    <div class="blob-bg w-[500px] h-[500px] bg-sky-200 dark:bg-indigo-950 bottom-[200px] right-[-200px] rounded-full pulse-element" style="animation-delay: 2s;"></div>
+
+    <!-- Header Navigation -->
+    <header class="fixed top-0 left-0 w-full z-50 glass-header transition-all duration-300">
+        <div class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+            <a href="#" class="flex items-center gap-3 group">
+                <div class="w-11 h-11 bg-electricBlue rounded-2xl flex items-center justify-center text-white shadow-lg shadow-blue-500/20 transform group-hover:rotate-12 transition-transform duration-300">
+                    <i class="fa-solid fa-shield-halved text-lg"></i>
+                </div>
+                <div class="flex flex-col">
+                    <span class="text-xl font-bold tracking-tight text-premiumDark dark:text-white">Nova<span class="text-electricBlue">Clinic</span></span>
+                    <span class="text-[10px] text-slate-500 dark:text-slate-400 tracking-wider" data-i18n="tagline">Advanced Healthcare Center</span>
+                </div>
+            </a>
+
+            <!-- Navigation Links -->
+            <nav class="hidden md:flex items-center gap-8 font-semibold text-slate-600 dark:text-slate-300">
+                <a href="#hero" class="hover:text-electricBlue transition-colors duration-200" data-i18n="nav_home">Home</a>
+                <a href="#schedule" class="hover:text-electricBlue transition-colors duration-200" data-i18n="nav_doctors">Doctors & Fees</a>
+                <a href="#booking" class="hover:text-electricBlue transition-colors duration-200" data-i18n="nav_book">Book Appointment</a>
+                <a href="#testimonials" class="hover:text-electricBlue transition-colors duration-200" data-i18n="nav_reviews">Patient Reviews</a>
+                <a href="#complaints" class="hover:text-electricBlue transition-colors duration-200" data-i18n="nav_support">Feedback & Support</a>
+            </nav>
+
+            <div class="flex items-center gap-3">
+                <!-- Theme Switcher (Dark/Light) -->
+                <button onclick="toggleDarkMode()" class="p-2.5 bg-slate-100 dark:bg-slate-800 rounded-2xl text-slate-700 dark:text-slate-200 hover:text-electricBlue transition-colors" title="Toggle Theme">
+                    <i id="theme-icon" class="fa-solid fa-moon text-lg"></i>
+                </button>
+
+                <!-- Language Switcher -->
+                <button onclick="toggleLanguage()" class="p-2.5 bg-slate-100 dark:bg-slate-800 rounded-2xl text-slate-700 dark:text-slate-200 hover:text-electricBlue font-bold text-xs transition-colors flex items-center gap-1">
+                    <i class="fa-solid fa-globe text-sm"></i>
+                    <span id="lang-btn-text">العربية</span>
+                </button>
+
+                <a href="#booking" class="hidden sm:inline-flex btn-neon bg-electricBlue text-white hover:bg-premiumBlue px-5 py-2.5 rounded-2xl font-bold text-sm transition-all duration-300 items-center gap-2" data-i18n="btn_quick_book">
+                    <i class="fa-solid fa-calendar-check text-sm"></i>
+                    Quick Booking
+                </a>
+                
+                <button onclick="toggleSupportChat()" class="p-2.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl text-electricBlue hover:bg-iceBlue dark:hover:bg-slate-700 transition-colors relative" title="Consult Medical Assistant">
+                    <i class="fa-solid fa-user-doctor text-lg"></i>
+                    <span class="absolute top-1 right-1 w-2.5 h-2.5 bg-emerald-500 rounded-full animate-ping"></span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section id="hero" class="relative pt-36 pb-24 px-6 max-w-7xl mx-auto flex flex-col lg:flex-row items-center gap-16 min-h-screen">
+        <div class="flex-1 z-10">
+            <div class="inline-flex items-center gap-2 bg-blue-50 dark:bg-blue-950/60 border border-blue-100 dark:border-blue-900 text-electricBlue font-bold text-xs px-4 py-2 rounded-full mb-6">
+                <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                <span data-i18n="hero_badge">All specialized clinics are open and accepting patients today</span>
+            </div>
+            <h1 class="text-4xl md:text-6xl font-extrabold text-premiumDark dark:text-white leading-[1.25] mb-6" data-i18n="hero_title">
+                Your Health Deserves <br>
+                <span class="text-transparent bg-clip-text bg-gradient-to-r from-electricBlue to-premiumBlue dark:to-sky-400">Compassionate, Human Care</span>
+            </h1>
+            <p class="text-slate-600 dark:text-slate-300 text-lg md:text-xl leading-relaxed mb-8 max-w-xl" data-i18n="hero_desc">
+                At Nova Clinic, our medical consultants across Cardiology, Cosmetic Dentistry, Pediatrics, and <b>Psychological & Family Counseling</b> are here to provide tailored, thoughtful healthcare for you and your family.
+            </p>
+            
+            <div class="flex flex-col sm:flex-row items-center gap-4">
+                <a href="#booking" class="w-full sm:w-auto text-center btn-neon bg-electricBlue text-white hover:bg-premiumBlue px-8 py-4 rounded-2xl font-bold text-lg transition-all duration-300" data-i18n="btn_hero_book">
+                    Book Your Appointment
+                </a>
+                <a href="#schedule" class="w-full sm:w-auto text-center bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:border-electricBlue text-slate-700 dark:text-slate-200 hover:text-electricBlue px-8 py-4 rounded-2xl font-bold text-lg transition-all duration-300" data-i18n="btn_hero_doctors">
+                    Explore Consultants & Fees
+                </a>
+            </div>
+
+            <div class="grid grid-cols-3 gap-6 mt-12 border-t border-slate-200 dark:border-slate-800 pt-8">
+                <div>
+                    <h4 class="text-3xl font-black text-electricBlue">+18k</h4>
+                    <p class="text-xs text-slate-500 dark:text-slate-400 mt-1 font-semibold" data-i18n="stat_1">Happy & Healthy Patients</p>
+                </div>
+                <div>
+                    <h4 class="text-3xl font-black text-premiumDark dark:text-white">4 Depts</h4>
+                    <p class="text-xs text-slate-500 dark:text-slate-400 mt-1 font-semibold" data-i18n="stat_2">Including Mental Wellbeing</p>
+                </div>
+                <div>
+                    <h4 class="text-3xl font-black text-emerald-600 dark:text-emerald-400">100%</h4>
+                    <p class="text-xs text-slate-500 dark:text-slate-400 mt-1 font-semibold" data-i18n="stat_3">Instant Booking, Pay at Clinic</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Hero Image Frame -->
+        <div class="flex-1 relative w-full flex justify-center z-10">
+            <div class="relative w-[340px] h-[400px] md:w-[450px] md:h-[500px]">
+                <div class="absolute inset-0 bg-gradient-to-br from-blue-100 to-sky-200 dark:from-blue-900 dark:to-indigo-950 rounded-[40px] rotate-6 scale-95 opacity-50"></div>
+                <div class="absolute inset-0 bg-white dark:bg-slate-900 border border-slate-150 dark:border-slate-800 rounded-[40px] -rotate-3 scale-100 transition-transform hover:rotate-0 duration-500 shadow-2xl overflow-hidden">
+                    <img src="https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?auto=format&fit=crop&w=800&q=80" alt="Nova Healthcare Center" class="w-full h-full object-cover">
+                </div>
+                <div class="absolute bottom-6 -right-6 bg-white dark:bg-slate-800 p-4 rounded-2xl shadow-xl border border-slate-100 dark:border-slate-700 flex items-center gap-4 animate-bounce" style="animation-duration: 3s;">
+                    <div class="w-12 h-12 bg-blue-100 dark:bg-blue-900/60 rounded-xl flex items-center justify-center text-electricBlue">
+                        <i class="fa-solid fa-headset text-xl"></i>
+                    </div>
+                    <div>
+                        <h5 class="font-bold text-sm text-slate-800 dark:text-white" data-i18n="floating_title">Always Here for You</h5>
+                        <p class="text-xs text-slate-400" data-i18n="floating_desc">Dedicated Support Team</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Doctors & Schedule Section -->
+    <section id="schedule" class="py-24 bg-white dark:bg-slate-900 relative">
+        <div class="max-w-7xl mx-auto px-6">
+            <div class="flex flex-col md:flex-row md:items-end justify-between mb-12">
+                <div>
+                    <span class="text-electricBlue font-bold text-sm uppercase tracking-widest" data-i18n="doc_sub">Consultants Schedule & Fees</span>
+                    <h2 class="text-3xl md:text-4xl font-extrabold text-premiumDark dark:text-white mt-2" data-i18n="doc_title">Meet Our Medical Specialists</h2>
+                </div>
+                <p class="text-slate-500 dark:text-slate-400 max-w-md mt-4 md:mt-0 text-sm" data-i18n="doc_desc">
+                    Filter doctors by availability days. Your booking secures your appointment slot, and consultation fees are payable in full upon arrival at the clinic.
+                </p>
+            </div>
+
+            <!-- Filter Buttons -->
+            <div class="flex flex-wrap gap-2 mb-8 bg-iceBlue dark:bg-slate-800 p-2 rounded-2xl max-w-fit">
+                <button onclick="filterSchedule('all', this)" class="schedule-tab-btn px-6 py-3 rounded-xl font-bold text-sm bg-electricBlue text-white transition-all duration-300" data-i18n="filter_all">All Days</button>
+                <button onclick="filterSchedule('sat-mon', this)" class="schedule-tab-btn px-6 py-3 rounded-xl font-bold text-sm text-slate-600 dark:text-slate-300 hover:bg-white dark:hover:bg-slate-700 hover:text-electricBlue transition-all duration-300" data-i18n="filter_sat_mon">Sat - Mon</button>
+                <button onclick="filterSchedule('tue-thu', this)" class="schedule-tab-btn px-6 py-3 rounded-xl font-bold text-sm text-slate-600 dark:text-slate-300 hover:bg-white dark:hover:bg-slate-700 hover:text-electricBlue transition-all duration-300" data-i18n="filter_tue_thu">Tue - Thu</button>
+            </div>
+
+            <!-- Doctors Grid -->
+            <div id="doctors-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                
+                <!-- Doctor 1: Cardio -->
+                <div class="doctor-card-item bg-slate-50 dark:bg-slate-800/60 rounded-3xl p-5 border border-slate-200/50 dark:border-slate-700 hover:bg-white dark:hover:bg-slate-800 hover:border-electricBlue hover:shadow-xl transition-all duration-300 flex flex-col justify-between" data-days="sat-mon">
+                    <div>
+                        <div class="relative w-full h-48 rounded-2xl overflow-hidden mb-4">
+                            <img src="https://images.unsplash.com/photo-1537368910025-700350fe46c7?auto=format&fit=crop&w=400&q=80" alt="Dr. Mostafa El-Shafei" class="w-full h-full object-cover">
+                            <span class="absolute top-2 right-2 text-xs bg-blue-600 text-white font-bold px-3 py-1 rounded-full" data-i18n="doc1_tag">Cardiologist</span>
+                        </div>
+                        <h3 class="font-bold text-lg text-premiumDark dark:text-white" data-i18n="doc1_name">Dr. Mostafa El-Shafei</h3>
+                        <p class="text-xs text-slate-500 dark:text-slate-400 mb-4" data-i18n="doc1_bio">Consultant in Interventional Cardiology and Cardiovascular Surgery.</p>
+                        
+                        <div class="space-y-2 mb-4">
+                            <div class="flex justify-between items-center text-xs">
+                                <span class="text-slate-400 font-semibold" data-i18n="lbl_hours">Working Hours:</span>
+                                <span class="bg-blue-50 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300 font-bold px-2 py-0.5 rounded">09:00 AM - 03:00 PM</span>
+                            </div>
+                            <div class="flex justify-between items-center text-xs">
+                                <span class="text-slate-400 font-semibold" data-i18n="lbl_days">Available Days:</span>
+                                <span class="text-slate-700 dark:text-slate-300 font-semibold" data-i18n="filter_sat_mon">Sat - Mon</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="border-t border-slate-200 dark:border-slate-700 pt-4 mt-2">
+                        <div class="flex justify-between items-center">
+                            <div>
+                                <span class="block text-[10px] text-slate-400" data-i18n="lbl_fee">Consultation Fee</span>
+                                <span class="text-lg font-extrabold text-blue-600 dark:text-blue-400">800 EGP</span>
+                            </div>
+                            <span class="text-[10px] bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-300 px-2.5 py-1.5 rounded-lg font-bold" data-i18n="pay_at_clinic">Pay at Clinic</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Doctor 2: Dental -->
+                <div class="doctor-card-item bg-slate-50 dark:bg-slate-800/60 rounded-3xl p-5 border border-slate-200/50 dark:border-slate-700 hover:bg-white dark:hover:bg-slate-800 hover:border-electricBlue hover:shadow-xl transition-all duration-300 flex flex-col justify-between" data-days="tue-thu">
+                    <div>
+                        <div class="relative w-full h-48 rounded-2xl overflow-hidden mb-4">
+                            <img src="https://images.unsplash.com/photo-1594824813573-246434de83fb?auto=format&fit=crop&w=400&q=80" alt="Dr. Yasmine El-Sayegh" class="w-full h-full object-cover">
+                            <span class="absolute top-2 right-2 text-xs bg-purple-600 text-white font-bold px-3 py-1 rounded-full" data-i18n="doc2_tag">Dental Specialist</span>
+                        </div>
+                        <h3 class="font-bold text-lg text-premiumDark dark:text-white" data-i18n="doc2_name">Dr. Yasmine El-Sayegh</h3>
+                        <p class="text-xs text-slate-500 dark:text-slate-400 mb-4" data-i18n="doc2_bio">Specialist in Cosmetic Dentistry, Digital Smile Design, and Laser Dentistry.</p>
+                        
+                        <div class="space-y-2 mb-4">
+                            <div class="flex justify-between items-center text-xs">
+                                <span class="text-slate-400 font-semibold" data-i18n="lbl_hours">Working Hours:</span>
+                                <span class="bg-blue-50 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300 font-bold px-2 py-0.5 rounded">02:00 PM - 08:00 PM</span>
+                            </div>
+                            <div class="flex justify-between items-center text-xs">
+                                <span class="text-slate-400 font-semibold" data-i18n="lbl_days">Available Days:</span>
+                                <span class="text-slate-700 dark:text-slate-300 font-semibold" data-i18n="filter_tue_thu">Tue - Thu</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="border-t border-slate-200 dark:border-slate-700 pt-4 mt-2">
+                        <div class="flex justify-between items-center">
+                            <div>
+                                <span class="block text-[10px] text-slate-400" data-i18n="lbl_fee">Consultation Fee</span>
+                                <span class="text-lg font-extrabold text-blue-600 dark:text-blue-400">600 EGP</span>
+                            </div>
+                            <span class="text-[10px] bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-300 px-2.5 py-1.5 rounded-lg font-bold" data-i18n="pay_at_clinic">Pay at Clinic</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Doctor 3: Pediatrics -->
+                <div class="doctor-card-item bg-slate-50 dark:bg-slate-800/60 rounded-3xl p-5 border border-slate-200/50 dark:border-slate-700 hover:bg-white dark:hover:bg-slate-800 hover:border-electricBlue hover:shadow-xl transition-all duration-300 flex flex-col justify-between" data-days="sat-mon">
+                    <div>
+                        <div class="relative w-full h-48 rounded-2xl overflow-hidden mb-4">
+                             [https://images.unsplash.com/photo-1622253692010-333f2da6031d?auto=format&fit=crop&w=400&q=80](https://images.unsplash.com/photo-1622253692010-333f2da6031d?auto=format&fit=crop&w=400&q=80)
+                        </div>
+                        <h3 class="font-bold text-lg text-premiumDark dark:text-white" data-i18n="doc3_name">Dr. Tarek El-Husseini</h3>
+                        <p class="text-xs text-slate-500 dark:text-slate-400 mb-4" data-i18n="doc3_bio">Senior Pediatrician & Neonatology Specialist, MRCPCH Member.</p>
+                        
+                        <div class="space-y-2 mb-4">
+                            <div class="flex justify-between items-center text-xs">
+                                <span class="text-slate-400 font-semibold" data-i18n="lbl_hours">Working Hours:</span>
+                                <span class="bg-blue-50 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300 font-bold px-2 py-0.5 rounded">11:00 AM - 05:00 PM</span>
+                            </div>
+                            <div class="flex justify-between items-center text-xs">
+                                <span class="text-slate-400 font-semibold" data-i18n="lbl_days">Available Days:</span>
+                                <span class="text-slate-700 dark:text-slate-300 font-semibold" data-i18n="filter_sat_mon">Sat - Mon</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="border-t border-slate-200 dark:border-slate-700 pt-4 mt-2">
+                        <div class="flex justify-between items-center">
+                            <div>
+                                <span class="block text-[10px] text-slate-400" data-i18n="lbl_fee">Consultation Fee</span>
+                                <span class="text-lg font-extrabold text-blue-600 dark:text-blue-400">500 EGP</span>
+                            </div>
+                            <span class="text-[10px] bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-300 px-2.5 py-1.5 rounded-lg font-bold" data-i18n="pay_at_clinic">Pay at Clinic</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Doctor 4: Mental Wellbeing -->
+                <div class="doctor-card-item bg-slate-50 dark:bg-slate-800/60 rounded-3xl p-5 border border-slate-200/50 dark:border-slate-700 hover:bg-white dark:hover:bg-slate-800 hover:border-electricBlue hover:shadow-xl transition-all duration-300 flex flex-col justify-between" data-days="tue-thu">
+                    <div>
+                        <div class="relative w-full h-48 rounded-2xl overflow-hidden mb-4">
+                            <img src="https://images.unsplash.com/photo-1551836022-d5d88e9218df?auto=format&fit=crop&w=400&q=80" alt="Dr. Leila Abdel-Rahman" class="w-full h-full object-cover">
+                            <span class="absolute top-2 right-2 text-xs bg-rose-600 text-white font-bold px-3 py-1 rounded-full" data-i18n="doc4_tag">Mental Wellbeing</span>
+                        </div>
+                        <h3 class="font-bold text-lg text-premiumDark dark:text-white" data-i18n="doc4_name">Dr. Leila Abdel-Rahman</h3>
+                        <p class="text-xs text-slate-500 dark:text-slate-400 mb-4" data-i18n="doc4_bio">Psychotherapy Consultant specializing in Anxiety, Stress & Family Counseling.</p>
+                        
+                        <div class="space-y-2 mb-4">
+                            <div class="flex justify-between items-center text-xs">
+                                <span class="text-slate-400 font-semibold" data-i18n="lbl_hours">Working Hours:</span>
+                                <span class="bg-blue-50 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300 font-bold px-2 py-0.5 rounded">03:00 PM - 09:00 PM</span>
+                            </div>
+                            <div class="flex justify-between items-center text-xs">
+                                <span class="text-slate-400 font-semibold" data-i18n="lbl_days">Available Days:</span>
+                                <span class="text-slate-700 dark:text-slate-300 font-semibold" data-i18n="filter_tue_thu">Tue - Thu</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="border-t border-slate-200 dark:border-slate-700 pt-4 mt-2">
+                        <div class="flex justify-between items-center">
+                            <div>
+                                <span class="block text-[10px] text-slate-400" data-i18n="lbl_session_fee">Session Fee</span>
+                                <span class="text-lg font-extrabold text-rose-600 dark:text-rose-400">700 EGP</span>
+                            </div>
+                            <span class="text-[10px] bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-300 px-2.5 py-1.5 rounded-lg font-bold" data-i18n="pay_at_clinic">Pay at Clinic</span>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- Appointment Booking System -->
+    <section id="booking" class="py-24 bg-iceBlue dark:bg-slate-950 relative">
+        <div class="max-w-4xl mx-auto px-6">
+            <div class="text-center mb-12">
+                <span class="text-electricBlue font-bold text-sm bg-blue-100 dark:bg-blue-950 px-4 py-1.5 rounded-full" data-i18n="book_badge">Instant Reservation System</span>
+                <h2 class="text-3xl md:text-4xl font-extrabold text-premiumDark dark:text-white mt-4" data-i18n="book_title">Reserve Your Spot Free — Pay Later</h2>
+                <p class="text-slate-500 dark:text-slate-400 mt-2 text-sm" data-i18n="book_subtitle">Fill in your information to reserve a slot. No online payment required—pay in person upon arrival.</p>
+            </div>
+
+            <!-- Booking Container -->
+            <div class="bg-white dark:bg-slate-900 rounded-3xl p-8 shadow-2xl border border-blue-100 dark:border-slate-800 relative overflow-hidden">
+                <div class="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-electricBlue to-premiumBlue"></div>
+                
+                <!-- Step Bar -->
+                <div class="flex justify-between items-center mb-10 border-b border-slate-100 dark:border-slate-800 pb-6">
+                    <div class="step-indicator active flex items-center gap-2 text-electricBlue font-bold" id="indicator-1">
+                        <span class="w-8 h-8 rounded-full bg-blue-600 text-white flex items-center justify-center text-sm">1</span>
+                        <span class="text-xs hidden sm:inline" data-i18n="step1_lbl">Department & Doctor</span>
+                    </div>
+                    <div class="h-[1px] bg-slate-200 dark:bg-slate-700 flex-1 mx-4"></div>
+                    <div class="step-indicator flex items-center gap-2 text-slate-400" id="indicator-2">
+                        <span class="w-8 h-8 rounded-full bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-400 flex items-center justify-center text-sm">2</span>
+                        <span class="text-xs hidden sm:inline" data-i18n="step2_lbl">Patient Details & Time</span>
+                    </div>
+                    <div class="h-[1px] bg-slate-200 dark:bg-slate-700 flex-1 mx-4"></div>
+                    <div class="step-indicator flex items-center gap-2 text-slate-400" id="indicator-3">
+                        <span class="w-8 h-8 rounded-full bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-400 flex items-center justify-center text-sm">3</span>
+                        <span class="text-xs hidden sm:inline" data-i18n="step3_lbl">Confirmation Ticket</span>
+                    </div>
+                </div>
+
+                <!-- Step 1 -->
+                <div id="booking-step-1" class="booking-step">
+                    <h3 class="font-bold text-lg text-premiumDark dark:text-white mb-6 flex items-center gap-2">
+                        <i class="fa-solid fa-hospital-user text-electricBlue"></i> 
+                        <span data-i18n="s1_heading">Choose Department & Specialist:</span>
+                    </h3>
+                    
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-8">
+                        <div>
+                            <label class="block text-sm font-bold text-slate-600 dark:text-slate-300 mb-2" data-i18n="lbl_select_dept">Medical Department</label>
+                            <select id="booking-department" class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-slate-700 dark:text-slate-200 font-semibold focus:outline-none focus:border-electricBlue transition-all" onchange="updateDoctorsForBooking()">
+                                <option value="" data-i18n="opt_dept_placeholder">Select a department...</option>
+                                <option value="cardio" data-i18n="opt_cardio">Cardiology Clinic</option>
+                                <option value="dental" data-i18n="opt_dental">Dental Clinic</option>
+                                <option value="pediatrics" data-i18n="opt_pediatrics">Pediatrics Clinic</option>
+                                <option value="therapist" data-i18n="opt_mental">Psychological Support & Wellbeing</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-bold text-slate-600 dark:text-slate-300 mb-2" data-i18n="lbl_select_doc">Consultant & Fee</label>
+                            <select id="booking-doctor" class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-slate-700 dark:text-slate-200 font-semibold focus:outline-none focus:border-electricBlue transition-all" disabled>
+                                <option value="" data-i18n="opt_doc_placeholder">Please choose a department first</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="flex justify-end">
+                        <button onclick="goToStep(2)" class="btn-neon bg-electricBlue text-white hover:bg-premiumBlue px-8 py-3.5 rounded-xl font-bold transition-all duration-300">
+                            <span data-i18n="btn_next_details">Continue to Patient Info</span> <i class="fa-solid fa-arrow-right ml-2 rtl:rotate-180"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Step 2 -->
+                <div id="booking-step-2" class="booking-step hidden">
+                    <h3 class="font-bold text-lg text-premiumDark dark:text-white mb-6 flex items-center gap-2">
+                        <i class="fa-solid fa-id-card text-electricBlue"></i> 
+                        <span data-i18n="s2_heading">Enter Your Details & Preferred Time:</span>
+                    </h3>
+                    
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-6">
+                        <div>
+                            <label class="block text-sm font-bold text-slate-600 dark:text-slate-300 mb-2" data-i18n="lbl_fullname">Full Name</label>
+                            <input type="text" id="patient-name" placeholder="e.g. Sarah Jenkins" class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-slate-700 dark:text-slate-200 focus:outline-none focus:border-electricBlue transition-all">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-bold text-slate-600 dark:text-slate-300 mb-2" data-i18n="lbl_phone">Mobile Number (SMS Confirmation)</label>
+                            <input type="tel" id="patient-phone" placeholder="e.g. 01012345678" class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-slate-700 dark:text-slate-200 focus:outline-none focus:border-electricBlue transition-all">
+                        </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-8">
+                        <div>
+                            <label class="block text-sm font-bold text-slate-600 dark:text-slate-300 mb-2" data-i18n="lbl_age">Age</label>
+                            <input type="number" id="patient-age" placeholder="e.g. 29" class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-slate-700 dark:text-slate-200 focus:outline-none focus:border-electricBlue transition-all">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-bold text-slate-600 dark:text-slate-300 mb-2" data-i18n="lbl_date">Preferred Date</label>
+                            <input type="date" id="booking-date" class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-slate-700 dark:text-slate-200 focus:outline-none focus:border-electricBlue transition-all">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-bold text-slate-600 dark:text-slate-300 mb-2" data-i18n="lbl_time">Time Slot</label>
+                            <select id="booking-time" class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-slate-700 dark:text-slate-200 focus:outline-none focus:border-electricBlue transition-all">
+                                <option value="09:00 AM - 10:00 AM">09:00 AM - 10:00 AM</option>
+                                <option value="11:30 AM - 12:30 PM">11:30 AM - 12:30 PM</option>
+                                <option value="03:00 PM - 04:00 PM">03:00 PM - 04:00 PM</option>
+                                <option value="06:00 PM - 07:00 PM">06:00 PM - 07:00 PM</option>
+                                <option value="08:00 PM - 09:00 PM">08:00 PM - 09:00 PM</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Payment Policy Banner -->
+                    <div class="bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 rounded-2xl p-4 flex items-start gap-3 mb-8">
+                        <div class="w-8 h-8 bg-emerald-100 dark:bg-emerald-900 text-emerald-600 dark:text-emerald-300 rounded-full flex items-center justify-center flex-shrink-0 text-sm">
+                            <i class="fa-solid fa-circle-dollar-to-slot"></i>
+                        </div>
+                        <div>
+                            <h5 class="text-sm font-bold text-emerald-800 dark:text-emerald-300" data-i18n="pay_banner_title">Payment Policy & Confirmation:</h5>
+                            <p class="text-xs text-emerald-700 dark:text-emerald-400 leading-relaxed mt-1" data-i18n="pay_banner_desc">
+                                Online reservation is 100% free. <b>All session fees are payable in cash or by credit card directly to our receptionist when you arrive at the clinic</b>.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="flex justify-between">
+                        <button onclick="goToStep(1)" class="bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 px-6 py-3.5 rounded-xl font-bold transition-all">
+                            <i class="fa-solid fa-arrow-left mr-2 rtl:rotate-180"></i> <span data-i18n="btn_back">Back</span>
+                        </button>
+                        <button onclick="generateBookingTicket()" class="btn-neon bg-emerald-600 hover:bg-emerald-700 text-white px-8 py-3.5 rounded-xl font-bold transition-all duration-300 flex items-center gap-2">
+                            <span data-i18n="btn_confirm_ticket">Confirm Booking & Send SMS</span> <i class="fa-solid fa-paper-plane"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Step 3 -->
+                <div id="booking-step-3" class="booking-step hidden text-center">
+                    <div class="w-16 h-16 bg-emerald-100 dark:bg-emerald-900/50 text-emerald-600 dark:text-emerald-400 rounded-full flex items-center justify-center mx-auto mb-4 text-3xl animate-pulse">
+                        <i class="fa-solid fa-circle-check"></i>
+                    </div>
+                    <h3 class="text-2xl font-extrabold text-premiumDark dark:text-white mb-1" data-i18n="tkt_success_title">Your Appointment is Confirmed!</h3>
+                    <p class="text-slate-500 dark:text-slate-400 text-sm mb-6" data-i18n="tkt_success_desc">An SMS confirmation has been dispatched to your mobile phone. Please show this digital pass upon arrival.</p>
+
+                    <!-- Digital Ticket -->
+                    <div class="border border-slate-200 dark:border-slate-700 rounded-3xl p-6 text-left dark:text-right max-w-md mx-auto bg-gradient-to-b from-white to-slate-50 dark:from-slate-800 dark:to-slate-900 relative overflow-hidden shadow-lg">
+                        <div class="absolute top-0 right-0 w-24 h-24 bg-blue-50 dark:bg-blue-900/20 rounded-full -translate-y-6 translate-x-6"></div>
+                        
+                        <div class="flex justify-between items-start border-b border-slate-100 dark:border-slate-700 pb-4 mb-4">
+                            <div>
+                                <h4 class="font-extrabold text-lg text-slate-800 dark:text-white">Nova Medical Clinic</h4>
+                                <p class="text-[10px] text-slate-400" data-i18n="tkt_tag">Official Patient Pass</p>
+                            </div>
+                            <div class="w-10 h-10 bg-electricBlue rounded-lg flex items-center justify-center text-white"><i class="fa-solid fa-qrcode"></i></div>
+                        </div>
+
+                        <div class="space-y-3">
+                            <div class="flex justify-between text-xs border-b border-slate-100 dark:border-slate-700/50 pb-2">
+                                <span class="text-slate-400 font-semibold" data-i18n="tkt_patient">Patient Name:</span>
+                                <span id="ticket-patient-name" class="font-bold text-slate-800 dark:text-white">-</span>
+                            </div>
+                            <div class="flex justify-between text-xs border-b border-slate-100 dark:border-slate-700/50 pb-2">
+                                <span class="text-slate-400 font-semibold" data-i18n="tkt_age">Age:</span>
+                                <span id="ticket-patient-age" class="font-bold text-slate-800 dark:text-white">-</span>
+                            </div>
+                            <div class="flex justify-between text-xs border-b border-slate-100 dark:border-slate-700/50 pb-2">
+                                <span class="text-slate-400 font-semibold" data-i18n="tkt_doctor">Assigned Consultant:</span>
+                                <span id="ticket-doctor-name" class="font-bold text-electricBlue">-</span>
+                            </div>
+                            <div class="flex justify-between text-xs border-b border-slate-100 dark:border-slate-700/50 pb-2">
+                                <span class="text-slate-400 font-semibold" data-i18n="tkt_date">Date & Day:</span>
+                                <span id="ticket-date" class="font-bold text-slate-800 dark:text-white">-</span>
+                            </div>
+                            <div class="flex justify-between text-xs border-b border-slate-100 dark:border-slate-700/50 pb-2">
+                                <span class="text-slate-400 font-semibold" data-i18n="tkt_time">Time Slot:</span>
+                                <span id="ticket-time" class="font-bold text-slate-800 dark:text-white">-</span>
+                            </div>
+                            <div class="flex justify-between text-xs border-b border-slate-100 dark:border-slate-700/50 pb-2">
+                                <span class="text-slate-400 font-semibold" data-i18n="tkt_fee">Consultation Fee:</span>
+                                <span id="ticket-price" class="font-extrabold text-rose-600 dark:text-rose-400 bg-rose-50 dark:bg-rose-950 px-2 py-0.5 rounded">-</span>
+                            </div>
+                            <div class="flex justify-between text-xs border-b border-slate-100 dark:border-slate-700/50 pb-2">
+                                <span class="text-slate-400 font-semibold" data-i18n="tkt_status">Payment Status:</span>
+                                <span class="font-extrabold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950 px-2.5 py-0.5 rounded" data-i18n="pay_upon_arrival">Pay Cash/Card at Clinic</span>
+                            </div>
+                            <div class="flex justify-between text-xs">
+                                <span class="text-slate-400 font-semibold" data-i18n="tkt_code">Ticket Number:</span>
+                                <span id="ticket-code" class="font-bold text-slate-600 dark:text-slate-300 tracking-wider">NV-0000-B</span>
+                            </div>
+                        </div>
+
+                        <div class="border-t border-dashed border-slate-200 dark:border-slate-700 mt-6 pt-4 text-center">
+                            <span class="text-[9px] text-slate-400 block mb-2 font-semibold" data-i18n="tkt_save_note">Save or screenshot this pass for quick check-in</span>
+                            <div class="flex justify-center items-center gap-1.5 h-10 bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-lg p-2 max-w-[200px] mx-auto">
+                                <div class="w-1 h-full bg-slate-800 dark:bg-slate-200"></div><div class="w-2 h-full bg-slate-800 dark:bg-slate-200"></div><div class="w-0.5 h-full bg-slate-800 dark:bg-slate-200"></div><div class="w-3 h-full bg-slate-800 dark:bg-slate-200"></div><div class="w-1 h-full bg-slate-800 dark:bg-slate-200"></div><div class="w-2 h-full bg-slate-800 dark:bg-slate-200"></div><div class="w-1 h-full bg-slate-800 dark:bg-slate-200"></div><div class="w-0.5 h-full bg-slate-800 dark:bg-slate-200"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button onclick="resetBooking()" class="mt-8 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 px-6 py-3 rounded-xl font-bold transition-all">
+                        <i class="fa-solid fa-redo mr-2"></i> <span data-i18n="btn_new_booking">Make Another Booking</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Patient Reviews -->
+    <section id="testimonials" class="py-24 bg-white dark:bg-slate-900 relative">
+        <div class="max-w-7xl mx-auto px-6">
+            <div class="text-center mb-16">
+                <span class="text-electricBlue font-bold text-sm uppercase tracking-widest" data-i18n="rev_badge">Patient Stories</span>
+                <h2 class="text-3xl md:text-4xl font-extrabold text-premiumDark dark:text-white mt-2" data-i18n="rev_title">Why Patients Trust Nova Clinic</h2>
+                <p class="text-slate-500 dark:text-slate-400 max-w-md mx-auto mt-2 text-sm" data-i18n="rev_subtitle">Read genuine experiences from our patients, or leave your feedback below.</p>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
+                
+                <!-- Review Form -->
+                <div class="bg-iceBlue dark:bg-slate-800 rounded-3xl p-8 border border-blue-100 dark:border-slate-700 sticky top-28">
+                    <h3 class="font-bold text-xl text-premiumDark dark:text-white mb-2" data-i18n="rev_form_title">Share Your Experience</h3>
+                    <p class="text-xs text-slate-400 mb-6" data-i18n="rev_form_subtitle">Your feedback helps us continuously refine our care.</p>
+                    
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-xs font-bold text-slate-500 dark:text-slate-300 mb-1.5" data-i18n="lbl_rev_name">Your Name</label>
+                            <input type="text" id="review-name" placeholder="e.g. Michael Ross..." class="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-electricBlue transition-all">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-500 dark:text-slate-300 mb-1.5" data-i18n="lbl_rev_rating">Rating</label>
+                            <div class="flex gap-1.5 text-xl text-slate-300" id="star-selector">
+                                <i class="fa-solid fa-star cursor-pointer star-select text-amber-400" onclick="setStarRating(1)"></i>
+                                <i class="fa-solid fa-star cursor-pointer star-select text-amber-400" onclick="setStarRating(2)"></i>
+                                <i class="fa-solid fa-star cursor-pointer star-select text-amber-400" onclick="setStarRating(3)"></i>
+                                <i class="fa-solid fa-star cursor-pointer star-select text-amber-400" onclick="setStarRating(4)"></i>
+                                <i class="fa-solid fa-star cursor-pointer star-select text-amber-400" onclick="setStarRating(5)"></i>
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-500 dark:text-slate-300 mb-1.5" data-i18n="lbl_rev_msg">Your Review</label>
+                            <textarea id="review-text" rows="3" placeholder="Tell us how your visit went..." class="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-electricBlue transition-all"></textarea>
+                        </div>
+                        <button onclick="submitReviewLive()" class="w-full btn-neon bg-electricBlue hover:bg-premiumBlue text-white py-3 rounded-xl font-bold text-sm transition-all duration-300 flex items-center justify-center gap-2">
+                            <span data-i18n="btn_post_review">Publish Review Live</span> <i class="fa-solid fa-share-nodes"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Testimonials Wall -->
+                <div class="lg:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-6" id="testimonials-wall">
+                    
+                    <div class="testimonial-card bg-slate-50 dark:bg-slate-800/60 rounded-2xl p-6 border border-slate-200/50 dark:border-slate-700 hover:shadow-lg transition-all duration-300">
+                        <div class="flex items-center gap-3 mb-4">
+                            <div class="w-10 h-10 rounded-full bg-blue-100 dark:bg-blue-900 text-electricBlue font-bold flex items-center justify-center text-sm">AM</div>
+                            <div>
+                                <h4 class="font-bold text-sm text-slate-800 dark:text-white">Ahmed Mansour</h4>
+                                <span class="text-[10px] text-slate-400" data-i18n="rev1_tag">Cardiology Patient</span>
+                            </div>
+                        </div>
+                        <p class="text-sm text-slate-500 dark:text-slate-300 leading-relaxed" data-i18n="rev1_text">"Dr. Mostafa El-Shafei is incredible. He made me feel completely comfortable throughout my catheter procedure. The staff were attentive every step of the way."</p>
+                        <div class="flex text-amber-400 text-xs gap-0.5 mt-4">
+                            <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
+                        </div>
+                    </div>
+
+                    <div class="testimonial-card bg-slate-50 dark:bg-slate-800/60 rounded-2xl p-6 border border-slate-200/50 dark:border-slate-700 hover:shadow-lg transition-all duration-300">
+                        <div class="flex items-center gap-3 mb-4">
+                            <div class="w-10 h-10 rounded-full bg-purple-100 dark:bg-purple-900 text-purple-600 dark:text-purple-300 font-bold flex items-center justify-center text-sm">RM</div>
+                            <div>
+                                <h4 class="font-bold text-sm text-slate-800 dark:text-white">Reem Mohamed</h4>
+                                <span class="text-[10px] text-slate-400" data-i18n="rev2_tag">Dental Patient</span>
+                            </div>
+                        </div>
+                        <p class="text-sm text-slate-500 dark:text-slate-300 leading-relaxed" data-i18n="rev2_text">"Got my teeth whitening done with Dr. Yasmine. Completely pain-free and super gentle! The online booking saved me so much hassle."</p>
+                        <div class="flex text-amber-400 text-xs gap-0.5 mt-4">
+                            <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star-half-stroke"></i>
+                        </div>
+                    </div>
+
+                    <div class="testimonial-card bg-slate-50 dark:bg-slate-800/60 rounded-2xl p-6 border border-slate-200/50 dark:border-slate-700 hover:shadow-lg transition-all duration-300">
+                        <div class="flex items-center gap-3 mb-4">
+                            <div class="w-10 h-10 rounded-full bg-rose-100 dark:bg-rose-900 text-rose-600 dark:text-rose-300 font-bold flex items-center justify-center text-sm">MA</div>
+                            <div>
+                                <h4 class="font-bold text-sm text-slate-800 dark:text-white">Mona Abdallah</h4>
+                                <span class="text-[10px] text-slate-400" data-i18n="rev3_tag">Counseling Client</span>
+                            </div>
+                        </div>
+                        <p class="text-sm text-slate-500 dark:text-slate-300 leading-relaxed" data-i18n="rev3_text">"My sessions with Dr. Leila have been truly transformative for my stress management. Extremely warm atmosphere, and paying at arrival was seamless."</p>
+                        <div class="flex text-amber-400 text-xs gap-0.5 mt-4">
+                            <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- Feedback & Complaints Desk -->
+    <section id="complaints" class="py-24 bg-slate-50 dark:bg-slate-950 relative border-t border-slate-200 dark:border-slate-800">
+        <div class="max-w-7xl mx-auto px-6">
+            <div class="text-center mb-16">
+                <span class="text-red-600 font-bold text-sm uppercase tracking-widest bg-red-50 dark:bg-red-950 px-4 py-1.5 rounded-full" data-i18n="sup_badge">Patient Care Desk</span>
+                <h2 class="text-3xl md:text-4xl font-extrabold text-premiumDark dark:text-white mt-4" data-i18n="sup_title">Feedback & Issue Tracking</h2>
+                <p class="text-slate-500 dark:text-slate-400 max-w-xl mx-auto mt-2 text-sm" data-i18n="sup_subtitle">We value transparency. Submit any concern or suggestion and track its live resolution status on our dashboard.</p>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-12">
+                <div class="bg-white dark:bg-slate-900 p-8 rounded-3xl shadow-xl border border-slate-200/50 dark:border-slate-800">
+                    <h3 class="font-bold text-xl text-premiumDark dark:text-white mb-6 flex items-center gap-2">
+                        <i class="fa-solid fa-square-plus text-red-500"></i>
+                        <span data-i18n="sup_form_heading">Submit a New Support Ticket</span>
+                    </h3>
+                    
+                    <div class="space-y-6">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                            <div>
+                                <label class="block text-sm font-bold text-slate-600 dark:text-slate-300 mb-2" data-i18n="lbl_fullname">Full Name</label>
+                                <input type="text" id="complaint-name" placeholder="Your full name..." class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-slate-700 dark:text-slate-200 focus:outline-none focus:border-red-500 transition-all">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-bold text-slate-600 dark:text-slate-300 mb-2" data-i18n="lbl_phone">Phone Number</label>
+                                <input type="tel" id="complaint-phone" placeholder="e.g. 01033..." class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-slate-700 dark:text-slate-200 focus:outline-none focus:border-red-500 transition-all">
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-bold text-slate-600 dark:text-slate-300 mb-2" data-i18n="lbl_sup_type">Category</label>
+                            <select id="complaint-type" class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-slate-700 dark:text-slate-200 focus:outline-none focus:border-red-500 transition-all">
+                                <option value="Reception" data-i18n="opt_cat_reception">Reception & Staff Assistance</option>
+                                <option value="Medical" data-i18n="opt_cat_medical">Medical Care & Consultation</option>
+                                <option value="Technical" data-i18n="opt_cat_tech">Website or Booking System</option>
+                                <option value="General" data-i18n="opt_cat_general">General Suggestion</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-bold text-slate-600 dark:text-slate-300 mb-2" data-i18n="lbl_sup_desc">Detailed Message</label>
+                            <textarea id="complaint-text" rows="4" placeholder="Please describe your experience or suggestion..." class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-slate-700 dark:text-slate-200 focus:outline-none focus:border-red-500 transition-all"></textarea>
+                        </div>
+
+                        <button onclick="submitComplaintLive()" class="w-full bg-red-600 hover:bg-red-700 text-white py-4 rounded-xl font-bold text-lg transition-all duration-300 flex items-center justify-center gap-2 shadow-lg shadow-red-500/10">
+                            <span data-i18n="btn_submit_ticket">Generate & Send Ticket</span>
+                            <i class="fa-solid fa-ticket"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Live Ticket Board -->
+                <div class="bg-slate-900 text-white p-8 rounded-3xl shadow-xl flex flex-col justify-between border border-slate-800">
+                    <div>
+                        <div class="flex justify-between items-center mb-6 border-b border-slate-800 pb-4">
+                            <div>
+                                <h3 class="font-bold text-xl text-white" data-i18n="board_title">Live Ticket Resolution Board</h3>
+                                <p class="text-xs text-slate-400 mt-1" data-i18n="board_subtitle">Real-time status updates from clinic management</p>
+                            </div>
+                            <span class="w-3 h-3 rounded-full bg-emerald-500 animate-ping"></span>
+                        </div>
+
+                        <div id="tickets-list" class="space-y-4 max-h-[350px] overflow-y-auto pr-1">
+                            <div class="p-4 bg-slate-800/80 rounded-2xl border border-slate-800 flex justify-between items-center gap-4">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-10 h-10 bg-emerald-500/10 rounded-xl text-emerald-500 flex items-center justify-center"><i class="fa-solid fa-clipboard-check"></i></div>
+                                    <div>
+                                        <div class="flex items-center gap-2">
+                                            <span class="font-bold text-sm text-white">Ticket #NV-1049</span>
+                                            <span class="text-[9px] bg-emerald-500/10 text-emerald-500 font-extrabold px-1.5 py-0.5 rounded-md" data-i18n="st_resolved">Resolved</span>
+                                        </div>
+                                        <p class="text-[11px] text-slate-400 mt-1 max-w-xs truncate">A. El-Majid: Suggestion to extend evening pediatric clinic hours.</p>
+                                    </div>
+                                </div>
+                                <span class="text-[10px] text-slate-500">1h ago</span>
+                            </div>
+
+                            <div class="p-4 bg-slate-800/80 rounded-2xl border border-slate-800 flex justify-between items-center gap-4">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-10 h-10 bg-amber-500/10 rounded-xl text-amber-500 flex items-center justify-center"><i class="fa-solid fa-spinner animate-spin"></i></div>
+                                    <div>
+                                        <div class="flex items-center gap-2">
+                                            <span class="font-bold text-sm text-white">Ticket #NV-1048</span>
+                                            <span class="text-[9px] bg-amber-500/10 text-amber-500 font-extrabold px-1.5 py-0.5 rounded-md" data-i18n="st_review">Under Review</span>
+                                        </div>
+                                        <p class="text-[11px] text-slate-400 mt-1 max-w-xs truncate">S. Al-Otaibi: Brief 10-minute wait time during Saturday rush.</p>
+                                    </div>
+                                </div>
+                                <span class="text-[10px] text-slate-500">3h ago</span>
+                            </div>
+
+                        </div>
+                    </div>
+
+                    <div class="border-t border-slate-800 pt-6 mt-6 grid grid-cols-2 gap-4">
+                        <div>
+                            <h5 class="text-slate-400 text-xs" data-i18n="stat_resp_lbl">Average Resolution Time:</h5>
+                            <p class="text-lg font-bold text-emerald-400 mt-1">24 Mins</p>
+                        </div>
+                        <div>
+                            <h5 class="text-slate-400 text-xs" data-i18n="stat_sat_lbl">Resolution Success Rate:</h5>
+                            <p class="text-lg font-bold text-electricBlue mt-1">100% This Month</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Floating AI Health Assistant -->
+    <div id="ai-chat" class="fixed bottom-6 left-6 z-50 flex flex-col items-end">
+        <div id="ai-chat-window" class="hidden w-[330px] sm:w-[360px] h-[450px] bg-white dark:bg-slate-900 rounded-3xl shadow-2xl border border-slate-200 dark:border-slate-800 overflow-hidden mb-4 flex flex-col justify-between transform transition-all duration-300 scale-95 opacity-0">
+            <div class="bg-gradient-to-r from-electricBlue to-premiumBlue text-white p-4 flex justify-between items-center">
+                <div class="flex items-center gap-3">
+                    <div class="w-8 h-8 bg-white/10 rounded-full flex items-center justify-center text-white"><i class="fa-solid fa-robot"></i></div>
+                    <div>
+                        <h4 class="font-bold text-sm" data-i18n="chat_header">Symptom Guide & Assistant</h4>
+                        <span class="text-[10px] text-emerald-300 font-bold block" data-i18n="chat_status">Online to assist you</span>
+                    </div>
+                </div>
+                <button onclick="toggleSupportChat()" class="text-white hover:text-red-300 transition-colors"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+
+            <div id="chat-messages" class="p-4 flex-1 overflow-y-auto space-y-4 text-sm">
+                <div class="flex items-start gap-2.5">
+                    <div class="w-7 h-7 rounded-full bg-blue-100 dark:bg-blue-900 text-electricBlue flex items-center justify-center text-xs flex-shrink-0"><i class="fa-solid fa-robot"></i></div>
+                    <div class="bg-slate-100 dark:bg-slate-800 p-3 rounded-2xl rounded-tl-none text-slate-700 dark:text-slate-200 leading-relaxed" data-i18n="chat_welcome">
+                        Hello! Welcome to Nova Clinic. What symptoms or specialty are you inquiring about today? (e.g., counseling, dental, cardiology, pediatrics)
+                    </div>
+                </div>
+            </div>
+
+            <div class="p-3 border-t border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 flex gap-2">
+                <input type="text" id="chat-input" placeholder="Type symptoms or specialty..." class="flex-grow bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-2 text-xs focus:outline-none focus:border-electricBlue text-slate-700 dark:text-slate-200 transition-all" onkeydown="if(event.key === 'Enter') sendChatMessage()">
+                <button onclick="sendChatMessage()" class="w-10 h-10 bg-electricBlue text-white hover:bg-premiumBlue rounded-xl flex items-center justify-center transition-colors"><i class="fa-solid fa-paper-plane text-sm"></i></button>
+            </div>
+        </div>
+
+        <button onclick="toggleSupportChat()" class="w-16 h-16 bg-electricBlue hover:bg-premiumBlue text-white rounded-full flex items-center justify-center shadow-2xl shadow-blue-500/30 btn-neon transform hover:scale-105 active:scale-95 transition-all duration-300">
+            <i class="fa-solid fa-user-doctor text-2xl"></i>
+        </button>
+    </div>
+
+    <!-- Custom Alert Modal -->
+    <div id="custom-alert" class="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm hidden transition-all duration-300 opacity-0">
+        <div class="bg-white dark:bg-slate-900 rounded-3xl p-6 max-w-sm w-full text-center border border-slate-100 dark:border-slate-800 shadow-2xl transform scale-95 transition-transform duration-300">
+            <div class="w-12 h-12 bg-blue-50 dark:bg-blue-900/50 text-electricBlue rounded-full flex items-center justify-center mx-auto mb-4 text-xl">
+                <i class="fa-solid fa-circle-info"></i>
+            </div>
+            <h4 class="font-bold text-slate-800 dark:text-white mb-2" data-i18n="alert_title">Nova Portal Notice</h4>
+            <p id="custom-alert-text" class="text-sm text-slate-600 dark:text-slate-300 leading-relaxed mb-6"></p>
+            <button onclick="closeCustomAlert()" class="w-full bg-electricBlue hover:bg-premiumBlue text-white py-3 rounded-xl font-bold transition-colors" data-i18n="btn_ok">OK</button>
+        </div>
+    </div>
+
+    <!-- Real SMS Toast Simulation Container -->
+    <div id="sms-toast-container" class="fixed top-5 right-5 z-[120] max-w-sm w-full pointer-events-none space-y-3"></div>
+
+    <!-- Footer -->
+    <footer class="bg-premiumDark text-white pt-16 pb-8 border-t border-slate-800">
+        <div class="max-w-7xl mx-auto px-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-12">
+            <div>
+                <a href="#" class="flex items-center gap-3 mb-6">
+                    <div class="w-10 h-10 bg-electricBlue rounded-xl flex items-center justify-center text-white"><i class="fa-solid fa-shield-halved"></i></div>
+                    <span class="text-xl font-bold">Nova<span class="text-electricBlue">Clinic</span></span>
+                </a>
+                <p class="text-slate-400 text-sm leading-relaxed" data-i18n="footer_about">
+                    Blending modern medical precision with authentic human empathy. Experience accessible, quality healthcare designed around your peace of mind.
+                </p>
+            </div>
+
+            <div>
+                <h4 class="font-bold text-lg mb-6" data-i18n="footer_contact">Contact Us</h4>
+                <ul class="space-y-4 text-sm text-slate-400">
+                    <li class="flex items-center gap-3"><i class="fa-solid fa-phone text-electricBlue"></i> 19482 (Hotline)</li>
+                    <li class="flex items-center gap-3"><i class="fa-solid fa-envelope text-electricBlue"></i> care@nova-clinic.com</li>
+                    <li class="flex items-center gap-3"><i class="fa-solid fa-location-dot text-electricBlue"></i> 5th Settlement, Cairo, Egypt</li>
+                </ul>
+            </div>
+
+            <div>
+                <h4 class="font-bold text-lg mb-6" data-i18n="footer_hours">Opening Hours</h4>
+                <ul class="space-y-3 text-sm text-slate-400">
+                    <li class="flex justify-between"><span>Sat - Wed:</span><span class="text-electricBlue">08:00 AM - 10:00 PM</span></li>
+                    <li class="flex justify-between"><span>Thursday:</span><span class="text-electricBlue">08:00 AM - 08:00 PM</span></li>
+                    <li class="flex justify-between"><span>Friday Emergency:</span><span class="text-red-400 font-bold">24/7 Coverage</span></li>
+                </ul>
+            </div>
+
+            <div>
+                <h4 class="font-bold text-lg mb-6" data-i18n="footer_newsletter">Stay Informed</h4>
+                <p class="text-slate-400 text-xs mb-4" data-i18n="footer_news_desc">Subscribe for preventive health advice and clinic announcements.</p>
+                <div class="flex gap-2">
+                    <input type="email" placeholder="Your email address..." class="bg-slate-800 border border-slate-700 rounded-xl px-4 py-2 text-xs w-full focus:outline-none focus:border-electricBlue text-white">
+                    <button class="bg-electricBlue hover:bg-premiumBlue text-white px-4 py-2 rounded-xl text-xs font-bold transition-all duration-300" data-i18n="btn_join">Join</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="max-w-7xl mx-auto px-6 border-t border-slate-800 pt-8 flex flex-col sm:flex-row items-center justify-between text-xs text-slate-500">
+            <p>© 2026 Nova Medical Portal. All rights reserved.</p>
+            <div class="flex gap-6 mt-4 sm:mt-0">
+                <a href="#" class="hover:text-white transition-colors" data-i18n="privacy">Privacy Policy</a>
+                <a href="#" class="hover:text-white transition-colors" data-i18n="terms">Terms of Service</a>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Interactive JavaScript logic -->
+    <script>
+        // ----------------------------------------------------
+        // I18N Translation Dictionary
+        // ----------------------------------------------------
+        let currentLang = 'en';
+        let selectedStarRating = 5;
+
+        const translations = {
+            en: {
+                tagline: "Advanced Healthcare Center",
+                nav_home: "Home",
+                nav_doctors: "Doctors & Fees",
+                nav_book: "Book Appointment",
+                nav_reviews: "Patient Reviews",
+                nav_support: "Feedback & Support",
+                btn_quick_book: "Quick Booking",
+                hero_badge: "All specialized clinics are open and accepting patients today",
+                hero_title: 'Your Health Deserves <br><span class="text-transparent bg-clip-text bg-gradient-to-r from-electricBlue to-premiumBlue dark:to-sky-400">Compassionate, Human Care</span>',
+                hero_desc: "At Nova Clinic, our medical consultants across Cardiology, Cosmetic Dentistry, Pediatrics, and <b>Psychological & Family Counseling</b> are here to provide tailored, thoughtful healthcare for you and your family.",
+                btn_hero_book: "Book Your Appointment",
+                btn_hero_doctors: "Explore Consultants & Fees",
+                stat_1: "Happy & Healthy Patients",
+                stat_2: "Including Mental Wellbeing",
+                stat_3: "Instant Booking, Pay at Clinic",
+                floating_title: "Always Here for You",
+                floating_desc: "Dedicated Support Team",
+                doc_sub: "Consultants Schedule & Fees",
+                doc_title: "Meet Our Medical Specialists",
+                doc_desc: "Filter doctors by availability days. Your booking secures your appointment slot, and consultation fees are payable in full upon arrival at the clinic.",
+                filter_all: "All Days",
+                filter_sat_mon: "Sat - Mon",
+                filter_tue_thu: "Tue - Thu",
+                doc1_tag: "Cardiologist",
+                doc1_name: "Dr. Mostafa El-Shafei",
+                doc1_bio: "Consultant in Interventional Cardiology and Cardiovascular Surgery.",
+                lbl_hours: "Working Hours:",
+                lbl_days: "Available Days:",
+                lbl_fee: "Consultation Fee",
+                lbl_session_fee: "Session Fee",
+                pay_at_clinic: "Pay at Clinic",
+                doc2_tag: "Dental Specialist",
+                doc2_name: "Dr. Yasmine El-Sayegh",
+                doc2_bio: "Specialist in Cosmetic Dentistry, Digital Smile Design, and Laser Dentistry.",
+                doc3_tag: "Pediatrician",
+                doc3_name: "Dr. Tarek El-Husseini",
+                doc3_bio: "Senior Pediatrician & Neonatology Specialist, MRCPCH Member.",
+                doc4_tag: "Mental Wellbeing",
+                doc4_name: "Dr. Leila Abdel-Rahman",
+                doc4_bio: "Psychotherapy Consultant specializing in Anxiety, Stress & Family Counseling.",
+                book_badge: "Instant Reservation System",
+                book_title: "Reserve Your Spot Free — Pay Later",
+                book_subtitle: "Fill in your information to reserve a slot. No online payment required—pay in person upon arrival.",
+                step1_lbl: "Department & Doctor",
+                step2_lbl: "Patient Details & Time",
+                step3_lbl: "Confirmation Ticket",
+                s1_heading: "Choose Department & Specialist:",
+                lbl_select_dept: "Medical Department",
+                opt_dept_placeholder: "Select a department...",
+                opt_cardio: "Cardiology Clinic",
+                opt_dental: "Dental Clinic",
+                opt_pediatrics: "Pediatrics Clinic",
+                opt_mental: "Psychological Support & Wellbeing",
+                lbl_select_doc: "Consultant & Fee",
+                opt_doc_placeholder: "Please choose a department first",
+                btn_next_details: "Continue to Patient Info",
+                s2_heading: "Enter Your Details & Preferred Time:",
+                lbl_fullname: "Full Name",
+                lbl_phone: "Mobile Number (SMS Confirmation)",
+                lbl_age: "Age",
+                lbl_date: "Preferred Date",
+                lbl_time: "Time Slot",
+                pay_banner_title: "Payment Policy & Confirmation:",
+                pay_banner_desc: "Online reservation is 100% free. <b>All session fees are payable in cash or by credit card directly to our receptionist when you arrive at the clinic</b>.",
+                btn_back: "Back",
+                btn_confirm_ticket: "Confirm Booking & Send SMS",
+                tkt_success_title: "Your Appointment is Confirmed!",
+                tkt_success_desc: "An SMS confirmation has been dispatched to your mobile phone. Please show this digital pass upon arrival.",
+                tkt_tag: "Official Patient Pass",
+                tkt_patient: "Patient Name:",
+                tkt_age: "Age:",
+                tkt_doctor: "Assigned Consultant:",
+                tkt_date: "Date & Day:",
+                tkt_time: "Time Slot:",
+                tkt_fee: "Consultation Fee:",
+                tkt_status: "Payment Status:",
+                pay_upon_arrival: "Pay Cash/Card at Clinic",
+                tkt_code: "Ticket Number:",
+                tkt_save_note: "Save or screenshot this pass for quick check-in",
+                btn_new_booking: "Make Another Booking",
+                rev_badge: "Patient Stories",
+                rev_title: "Why Patients Trust Nova Clinic",
+                rev_subtitle: "Read genuine experiences from our patients, or leave your feedback below.",
+                rev_form_title: "Share Your Experience",
+                rev_form_subtitle: "Your feedback helps us continuously refine our care.",
+                lbl_rev_name: "Your Name",
+                lbl_rev_rating: "Rating",
+                lbl_rev_msg: "Your Review",
+                btn_post_review: "Publish Review Live",
+                rev1_tag: "Cardiology Patient",
+                rev1_text: '"Dr. Mostafa El-Shafei is incredible. He made me feel completely comfortable throughout my catheter procedure. The staff were attentive every step of the way."',
+                rev2_tag: "Dental Patient",
+                rev2_text: '"Got my teeth whitening done with Dr. Yasmine. Completely pain-free and super gentle! The online booking saved me so much hassle."',
+                rev3_tag: "Counseling Client",
+                rev3_text: '"My sessions with Dr. Leila have been truly transformative for my stress management. Extremely warm atmosphere, and paying at arrival was seamless."',
+                sup_badge: "Patient Care Desk",
+                sup_title: "Feedback & Issue Tracking",
+                sup_subtitle: "We value transparency. Submit any concern or suggestion and track its live resolution status on our dashboard.",
+                sup_form_heading: "Submit a New Support Ticket",
+                lbl_sup_type: "Category",
+                opt_cat_reception: "Reception & Staff Assistance",
+                opt_cat_medical: "Medical Care & Consultation",
+                opt_cat_tech: "Website or Booking System",
+                opt_cat_general: "General Suggestion",
+                lbl_sup_desc: "Detailed Message",
+                btn_submit_ticket: "Generate & Send Ticket",
+                board_title: "Live Ticket Resolution Board",
+                board_subtitle: "Real-time status updates from clinic management",
+                st_resolved: "Resolved",
+                st_review: "Under Review",
+                stat_resp_lbl: "Average Resolution Time:",
+                stat_sat_lbl: "Resolution Success Rate:",
+                chat_header: "Symptom Guide & Assistant",
+                chat_status: "Online to assist you",
+                chat_welcome: "Hello! Welcome to Nova Clinic. What symptoms or specialty are you inquiring about today? (e.g., counseling, dental, cardiology, pediatrics)",
+                alert_title: "Nova Portal Notice",
+                btn_ok: "OK",
+                footer_about: "Blending modern medical precision with authentic human empathy. Experience accessible, quality healthcare designed around your peace of mind.",
+                footer_contact: "Contact Us",
+                footer_hours: "Opening Hours",
+                footer_newsletter: "Stay Informed",
+                footer_news_desc: "Subscribe for preventive health advice and clinic announcements.",
+                btn_join: "Join",
+                privacy: "Privacy Policy",
+                terms: "Terms of Service"
+            },
+            ar: {
+                tagline: "الرعاية الطبية المتقدمة",
+                nav_home: "الرئيسية",
+                nav_doctors: "الأطباء والأسعار",
+                nav_book: "احجز ميعادك",
+                nav_reviews: "آراء العملاء",
+                nav_support: "الشكاوى والمقترحات",
+                btn_quick_book: "حجز سريع للموعد",
+                hero_badge: "جميع عياداتنا مستعدة لاستقبالكم اليوم ودعم صحتكم",
+                hero_title: 'صحتك تستحق <br><span class="text-transparent bg-clip-text bg-gradient-to-l from-electricBlue to-premiumBlue dark:to-sky-400">رعاية طبية تليق بك</span>',
+                hero_desc: "في نوفا كلينك نجمع أفضل الاستشاريين في مجالات جراحة القلب، زراعة وتجميل الأسنان، طب الأطفال، وخدمات <b>الدعم النفسي والأسري</b> لتوفير تغطية طبية شاملة ومريحة لأسرتك.",
+                btn_hero_book: "احجز ميعادك الآن",
+                btn_hero_doctors: "استعراض الأطباء والأسعار",
+                stat_1: "مريض وعميل سعيد بالخدمة",
+                stat_2: "شاملة استشارات الدعم النفسي",
+                stat_3: "تأكيد فوري ودفع بالعيادة",
+                floating_title: "الدعم مستمر لراحتكم",
+                floating_desc: "تواصل مباشر في أي وقت",
+                doc_sub: "تحديث جدول العمل والأسعار",
+                doc_title: "نخبة من الاستشاريين والأخصائيين بالعيادة",
+                doc_desc: "يمكنك تصفية الأطباء حسب الأيام. علمًا بأن حجزك مخصص لتأكيد ميعادك فقط، ويتم سداد رسوم الجلسة بالكامل عند زيارتك للعيادة.",
+                filter_all: "كل الأيام",
+                filter_sat_mon: "السبت - الاثنين",
+                filter_tue_thu: "الثلاثاء - الخميس",
+                doc1_tag: "استشاري قلب",
+                doc1_name: "د. مصطفى الشافعي",
+                doc1_bio: "استشاري جراحات القلب المفتوح والقسطرة المعقدة.",
+                lbl_hours: "ساعات العمل:",
+                lbl_days: "الأيام المتوفرة:",
+                lbl_fee: "سعر الكشف",
+                lbl_session_fee: "سعر الجلسة",
+                pay_at_clinic: "الدفع بالعيادة",
+                doc2_tag: "أخصائية أسنان",
+                doc2_name: "د. ياسمين الصايغ",
+                doc2_bio: "أخصائية تقويم وتجميل وزراعة الأسنان بالليزر والتقنيات الرقمية.",
+                doc3_tag: "استشاري أطفال",
+                doc3_name: "د. طارق الحسين",
+                doc3_bio: "استشاري طب الأطفال وحديثي الولادة وعضو الكلية الملكية.",
+                doc4_tag: "الدعم النفسي والأسري",
+                doc4_name: "د. ليلى عبد الرحمن",
+                doc4_bio: "استشارية العلاج والدعم النفسي والسلوكي وإدارة القلق والتوتر.",
+                book_badge: "نظام تأكيد الحجز الآلي الفوري",
+                book_title: "حجز مجاني للميعاد والدفع عند الوصول",
+                book_subtitle: "أدخل كافة تفاصيلك الشخصية لتسجيل موعد الجلسة في مصفوفة مواعيد الأطباء. لن تحتاج لدفع أي شيء على الموقع.",
+                step1_lbl: "العيادة والطبيب",
+                step2_lbl: "بيانات المريض والموعد",
+                step3_lbl: "تذكرة الحجز الرقمية",
+                s1_heading: "اختر القسم والطبيب المطلوب:",
+                lbl_select_dept: "تخصص العيادة المطلوب",
+                opt_dept_placeholder: "اختر القسم المطلوب...",
+                opt_cardio: "عيادة أمراض القلب والأوعية الدموية",
+                opt_dental: "عيادة طب وتجميل وزراعة الأسنان",
+                opt_pediatrics: "عيادة الأطفال والولادة",
+                opt_mental: "عيادة الدعم والاستشارات النفسية",
+                lbl_select_doc: "الطبيب الاستشاري المتوفر وسعر جلسته",
+                opt_doc_placeholder: "يرجى اختيار القسم أولاً",
+                btn_next_details: "الاستمرار وإدخال بياناتي",
+                s2_heading: "أدخل بياناتك الشخصية بالكامل لمراجعتها:",
+                lbl_fullname: "الاسم الكامل للمريض",
+                lbl_phone: "رقم هاتف المريض لتأكيد التذكرة",
+                lbl_age: "عمر المريض",
+                lbl_date: "اليوم والتاريخ المتاح",
+                lbl_time: "الفترة الزمنية والساعة",
+                pay_banner_title: "سياسة السداد وتأكيد الميعاد:",
+                pay_banner_desc: "هذا الحجز مجاني بالكامل ويسجل لحفظ ميعاد الجلسة وضمان تفرغ الطبيب لك. <b>يتم سداد رسوم الجلسة نقداً أو بالفيزا مباشرة عند وصولك لموظف الاستقبال بالعيادة</b>.",
+                btn_back: "السابق",
+                btn_confirm_ticket: "تأكيد حجز ميعادك وإرسال SMS",
+                tkt_success_title: "تم حجز وتأكيد ميعادك بنجاح!",
+                tkt_success_desc: "تم إصدار تذكرة الحجز الرقمية وإرسال رسالة SMS على هاتفكم.",
+                tkt_tag: "تذكرة حجز ميعاد مؤكدة",
+                tkt_patient: "المريض:",
+                tkt_age: "العمر:",
+                tkt_doctor: "الطبيب والاستشاري:",
+                tkt_date: "تاريخ الجلسة والميعاد:",
+                tkt_time: "الساعة المحدد:",
+                tkt_fee: "سعر وتكلفة الجلسة بالعيادة:",
+                tkt_status: "حالة الدفع المطلوبة:",
+                pay_upon_arrival: "الدفع نقداً أو فيزا بالعيادة عند الوصول",
+                tkt_code: "رمز التذكرة المعتمد:",
+                tkt_save_note: "يرجى فحص التذكرة وحفظها كلقطة شاشة للهاتف للتحقق",
+                btn_new_booking: "حجز جديد",
+                rev_badge: "نبض ومراجعات مرضانا",
+                rev_title: "لماذا يختار المرضى عيادة نوفا؟",
+                rev_subtitle: "شاهد تجارب وقصص نجاح المرضى معنا، وشارك قصتك بكل سهولة وبشكل فوري.",
+                rev_form_title: "أضف تجربتك الطبية معنا",
+                rev_form_subtitle: "شارك برأيك بصراحة تامة لمساعدتنا على التطور والازدهار لخدمتك دائماً.",
+                lbl_rev_name: "اسمك الكريم",
+                lbl_rev_rating: "التقييم بالنجوم",
+                lbl_rev_msg: "رسالتك وتجربتك",
+                btn_post_review: "انشر تقييمك فوراً على الجدار",
+                rev1_tag: "مريض بعيادة القلب",
+                rev1_text: '"الدكتور مصطفى الشافعي قمة في الأخلاق والاحترافية. عملت عملية قسطرة بسيطة وكانوا معي خطوة بخطوة حتى التماثل للشفاء بفضل الله وعنايتهم."',
+                rev2_tag: "مريضة بعيادة الأسنان",
+                rev2_text: '"سويت تبييض وابتسامة هوليود رقمية كاملة عند دكتورة ياسمين. الصراحة لا ألم ولا خوف، والموقع ونظام الحجز سهل علي وايد أشياء."',
+                rev3_tag: "مراجعة بطلب الدعم النفسي",
+                rev3_text: '"سجلت ميعاد جلسة دعم نفسي مع د. ليلى عبد الرحمن، المقابلة مريحة جداً والجلسة كانت مفيدة للغاية لتنظيم حياتي. والدفع عند الوصول ميزة رائعة."',
+                sup_badge: "مركز العناية الفورية بالمرضى",
+                sup_title: "منصة المقترحات وتلقي الملاحظات وتتبعها",
+                sup_subtitle: "نؤمن أن الشفافية أساس النجاح. ارسل مشكلتك أو اقتراحك وتتبع تقدم الحل مباشرة عبر نظام التذاكر التفاعلي في نفس اللحظة.",
+                sup_form_heading: "إنشاء تذكرة ملاحظة أو شكوى جديدة",
+                lbl_sup_type: "نوع الملاحظة",
+                opt_cat_reception: "مشكلة أو ملحوظة في الاستقبال والمعاملة",
+                opt_cat_medical: "رأي خاص بالأداء أو العلاج الطبي",
+                opt_cat_tech: "مشكلة تقنية في الموقع أو منصة الحجز",
+                opt_cat_general: "مقترح عام لتطوير خدمات نوفا",
+                lbl_sup_desc: "شرح تفصيلي للملاحظة أو المشكلة",
+                btn_submit_ticket: "توليد رقم التذكرة وإرسالها فوراً",
+                board_title: "لوحة تتبع التذاكر النشطة",
+                board_subtitle: "تحديث حي ومستمر لحالة المعالجة والمتابعة",
+                st_resolved: "تم الحل والاتصال",
+                st_review: "تحت المراجعة من الإدارة",
+                stat_resp_lbl: "متوسط وقت الاستجابة والحل:",
+                stat_sat_lbl: "نسبة إغلاق الشكاوى بنجاح:",
+                chat_header: "مستشار الأعراض والمواعيد",
+                chat_status: "متاح لمساعدتك فوراً",
+                chat_welcome: "أهلاً بك في بوابة نوفا الطبية! أنا مساعدك الطبي الفوري لتوجيه الأعراض والرد على استفساراتك. ما هي الأعراض التي تعاني منها؟",
+                alert_title: "تنبيه من نوفا كلينك",
+                btn_ok: "موافق",
+                footer_about: "مستقبل الطب والرعاية المتقدمة بين يديك. رعاية متخصصة، تقنيات عالمية مدمجة وثقافة خدمية راقية تلبي تطلعاتك.",
+                footer_contact: "تواصل معنا",
+                footer_hours: "ساعات عمل العيادة",
+                footer_newsletter: "كن أول العارفين",
+                footer_news_desc: "اشترك بنشرتنا الطبية لتصلك أحدث النصائح الوقائية وعروض العيادة الدورية.",
+                btn_join: "انضم",
+                privacy: "سياسة الخصوصية",
+                terms: "شروط الاستخدام والدعم الرقمي"
+            }
+        };
+
+        // ----------------------------------------------------
+        // Theme Toggle (Dark/Light Mode)
+        // ----------------------------------------------------
+        function toggleDarkMode() {
+            const html = document.documentElement;
+            const themeIcon = document.getElementById('theme-icon');
+            if (html.classList.contains('dark')) {
+                html.classList.remove('dark');
+                html.classList.add('light');
+                themeIcon.className = 'fa-solid fa-moon text-lg';
+            } else {
+                html.classList.remove('light');
+                html.classList.add('dark');
+                themeIcon.className = 'fa-solid fa-sun text-lg text-amber-400';
+            }
+        }
+
+        // ----------------------------------------------------
+        // Language Toggle (EN/AR)
+        // ----------------------------------------------------
+        function toggleLanguage() {
+            currentLang = currentLang === 'en' ? 'ar' : 'en';
+            const html = document.documentElement;
+            const langBtnText = document.getElementById('lang-btn-text');
+
+            if (currentLang === 'ar') {
+                html.setAttribute('dir', 'rtl');
+                html.setAttribute('lang', 'ar');
+                langBtnText.textContent = 'English';
+            } else {
+                html.setAttribute('dir', 'ltr');
+                html.setAttribute('lang', 'en');
+                langBtnText.textContent = 'العربية';
+            }
+
+            // Apply text translations to all elements with data-i18n
+            document.querySelectorAll('[data-i18n]').forEach(el => {
+                const key = el.getAttribute('data-i18n');
+                if (translations[currentLang] && translations[currentLang][key]) {
+                    el.innerHTML = translations[currentLang][key];
+                }
+            });
+
+            // Update doctor dropdowns if active
+            updateDoctorsForBooking();
+        }
+
+        // ----------------------------------------------------
+        // Page Initialization
+        // ----------------------------------------------------
+        document.addEventListener('DOMContentLoaded', () => {
+            const dateInput = document.getElementById('booking-date');
+            if(dateInput) {
+                const today = new Date().toISOString().split('T')[0];
+                dateInput.setAttribute('min', today);
+            }
+        });
+
+        function showCustomAlert(message) {
+            const alertModal = document.getElementById('custom-alert');
+            const alertText = document.getElementById('custom-alert-text');
+            alertText.textContent = message;
+            
+            alertModal.classList.remove('hidden');
+            setTimeout(() => {
+                alertModal.classList.remove('opacity-0');
+                alertModal.querySelector('div').classList.remove('scale-95');
+                alertModal.classList.add('opacity-100');
+                alertModal.querySelector('div').classList.add('scale-100');
+            }, 10);
+        }
+
+        function closeCustomAlert() {
+            const alertModal = document.getElementById('custom-alert');
+            alertModal.classList.remove('opacity-100');
+            alertModal.querySelector('div').classList.remove('scale-100');
+            alertModal.classList.add('opacity-0');
+            alertModal.querySelector('div').classList.add('scale-95');
+            setTimeout(() => {
+                alertModal.classList.add('hidden');
+            }, 300);
+        }
+
+        function filterSchedule(category, btnElement) {
+            const buttons = document.querySelectorAll('.schedule-tab-btn');
+            buttons.forEach(btn => {
+                btn.classList.remove('bg-electricBlue', 'text-white');
+                btn.classList.add('text-slate-600', 'dark:text-slate-300');
+            });
+            
+            if (btnElement) {
+                btnElement.classList.add('bg-electricBlue', 'text-white');
+                btnElement.classList.remove('text-slate-600', 'dark:text-slate-300');
+            }
+
+            const doctorCards = document.querySelectorAll('.doctor-card-item');
+            doctorCards.forEach(card => {
+                const days = card.getAttribute('data-days');
+                if (category === 'all' || days === category) {
+                    card.classList.remove('hidden');
+                } else {
+                    card.classList.add('hidden');
+                }
+            });
+        }
+
+        // ----------------------------------------------------
+        // Doctors Data Dictionary
+        // ----------------------------------------------------
+        const doctorsData = {
+            en: {
+                cardio: [{ id: "dr-mostafa", name: "Dr. Mostafa El-Shafei - 800 EGP" }],
+                dental: [{ id: "dr-yasmin", name: "Dr. Yasmine El-Sayegh - 600 EGP" }],
+                pediatrics: [{ id: "dr-tarek", name: "Dr. Tarek El-Husseini - 500 EGP" }],
+                therapist: [{ id: "dr-layla", name: "Dr. Leila Abdel-Rahman (Mental Wellbeing) - 700 EGP" }]
+            },
+            ar: {
+                cardio: [{ id: "dr-mostafa", name: "د. مصطفى الشافعي - 800 ج.م" }],
+                dental: [{ id: "dr-yasmin", name: "د. ياسمين الصايغ - 600 ج.م" }],
+                pediatrics: [{ id: "dr-tarek", name: "د. طارق الحسين - 500 ج.م" }],
+                therapist: [{ id: "dr-layla", name: "د. ليلى عبد الرحمن (الدعم النفسي) - 700 ج.م" }]
+            }
+        };
+
+        const doctorsDetails = {
+            en: {
+                "dr-mostafa": { name: "Dr. Mostafa El-Shafei", price: "800 EGP" },
+                "dr-yasmin": { name: "Dr. Yasmine El-Sayegh", price: "600 EGP" },
+                "dr-tarek": { name: "Dr. Tarek El-Husseini", price: "500 EGP" },
+                "dr-layla": { name: "Dr. Leila Abdel-Rahman (Mental Wellbeing)", price: "700 EGP" }
+            },
+            ar: {
+                "dr-mostafa": { name: "د. مصطفى الشافعي", price: "800 ج.م" },
+                "dr-yasmin": { name: "د. ياسمين الصايغ", price: "600 ج.م" },
+                "dr-tarek": { name: "د. طارق الحسين", price: "500 ج.م" },
+                "dr-layla": { name: "د. ليلى عبد الرحمن (الدعم النفسي)", price: "700 ج.م" }
+            }
+        };
+
+        function updateDoctorsForBooking() {
+            const department = document.getElementById('booking-department').value;
+            const doctorSelect = document.getElementById('booking-doctor');
+
+            if (!department) {
+                doctorSelect.innerHTML = `<option value="">${translations[currentLang].opt_doc_placeholder}</option>`;
+                doctorSelect.disabled = true;
+                return;
+            }
+
+            doctorSelect.disabled = false;
+            doctorSelect.innerHTML = `<option value="">${currentLang === 'en' ? 'Select consultant...' : 'اختر الطبيب المناسب...'}</option>`;
+
+            doctorsData[currentLang][department].forEach(doc => {
+                const option = document.createElement('option');
+                option.value = doc.id;
+                option.textContent = doc.name;
+                doctorSelect.appendChild(option);
+            });
+        }
+
+        function goToStep(step) {
+            if (step === 2) {
+                const dept = document.getElementById('booking-department').value;
+                const doc = document.getElementById('booking-doctor').value;
+                if (!dept || !doc) {
+                    showCustomAlert(currentLang === 'en' ? 'Please select a medical department and consultant first.' : 'يرجى اختيار تخصص الطبيب المتاح أولاً.');
+                    return;
+                }
+            }
+
+            document.querySelectorAll('.booking-step').forEach(div => div.classList.add('hidden'));
+            document.getElementById(`booking-step-${step}`).classList.remove('hidden');
+
+            document.querySelectorAll('.step-indicator').forEach(ind => ind.classList.remove('text-electricBlue', 'active'));
+            for (let i = 1; i <= step; i++) {
+                const indicator = document.getElementById(`indicator-${i}`);
+                if (indicator) {
+                    indicator.classList.add('text-electricBlue');
+                }
+            }
+        }
+
+        // ----------------------------------------------------
+        // Booking & Real SMS Simulation Trigger
+        // ----------------------------------------------------
+        function generateBookingTicket() {
+            const name = document.getElementById('patient-name').value.trim();
+            const phone = document.getElementById('patient-phone').value.trim();
+            const age = document.getElementById('patient-age').value.trim();
+            const date = document.getElementById('booking-date').value;
+            const time = document.getElementById('booking-time').value;
+            const doctorSelect = document.getElementById('booking-doctor').value;
+
+            if (!name || !phone || !age || !date || !time) {
+                showCustomAlert(currentLang === 'en' ? 'Please complete all required fields and select your preferred date/time.' : 'يرجى إكمال وتدقيق كافة البيانات والمواعيد والسن قبل إصدار التذكرة.');
+                return;
+            }
+
+            const docDetail = doctorsDetails[currentLang][doctorSelect];
+
+            document.getElementById('ticket-patient-name').textContent = name;
+            document.getElementById('ticket-patient-age').textContent = age + (currentLang === 'en' ? ' Yrs' : ' سنة');
+            document.getElementById('ticket-doctor-name').textContent = docDetail ? docDetail.name : '-';
+            document.getElementById('ticket-date').textContent = date;
+            document.getElementById('ticket-time').textContent = time;
+            document.getElementById('ticket-price').textContent = docDetail ? docDetail.price : '-';
+
+            const randomCode = `NV-${Math.floor(1000 + Math.random() * 9000)}-B`;
+            document.getElementById('ticket-code').textContent = randomCode;
+
+            // Trigger Step 3
+            goToStep(3);
+
+            // Trigger SMS Notification Toast to User's Phone
+            triggerSimulatedSMS(phone, randomCode, date, time, docDetail ? docDetail.name : 'Doctor');
+        }
+
+        // Real SMS Simulation Toast Popup Component
+        function triggerSimulatedSMS(phoneNum, ticketCode, date, time, doctorName) {
+            const container = document.getElementById('sms-toast-container');
+            
+            const smsCard = document.createElement('div');
+            smsCard.className = "pointer-events-auto bg-slate-900/95 dark:bg-white/95 text-white dark:text-slate-900 rounded-2xl p-4 shadow-2xl border border-blue-500/30 backdrop-blur-md sms-toast-animation";
+            
+            const smsMessage = currentLang === 'en' 
+                ? `<b>[Nova Clinic SMS]</b><br>Hello! Your appointment pass <b>#${ticketCode}</b> with <b>${doctorName}</b> is locked for <b>${date}</b> at <b>${time}</b>. Reminder: Consultation fees are payable upon arrival at the clinic.`
+                : `<b>[رسالة SMS من عيادة نوفا]</b><br>أهلاً بك! تم تأكيد ميعادك ورقم تذكرتك <b>#${ticketCode}</b> مع <b>${doctorName}</b> ليوم <b>${date}</b> الساعة <b>${time}</b>. نذكرك أن الدفع عند الحضور بالعيادة.`;
+
+            smsCard.innerHTML = `
+                <div class="flex items-start gap-3">
+                    <div class="w-9 h-9 rounded-xl bg-blue-600 text-white flex items-center justify-center flex-shrink-0 text-sm shadow-md">
+                        <i class="fa-solid fa-comment-sms"></i>
+                    </div>
+                    <div class="flex-1 text-xs leading-relaxed">
+                        <div class="flex justify-between items-center mb-1">
+                            <span class="font-bold text-[10px] uppercase text-blue-400 dark:text-blue-600">SMS Sent to ${phoneNum}</span>
+                            <span class="text-[9px] text-slate-400">Just Now</span>
+                        </div>
+                        <p>${smsMessage}</p>
+                    </div>
+                    <button onclick="this.parentElement.parentElement.remove()" class="text-slate-400 hover:text-white dark:hover:text-black transition-colors"><i class="fa-solid fa-xmark"></i></button>
+                </div>
+            `;
+
+            container.appendChild(smsCard);
+
+            // Auto dismiss after 8 seconds
+            setTimeout(() => {
+                if (smsCard) {
+                    smsCard.style.opacity = '0';
+                    smsCard.style.transition = 'all 0.5s ease';
+                    setTimeout(() => smsCard.remove(), 500);
+                }
+            }, 8000);
+        }
+
+        function resetBooking() {
+            document.getElementById('patient-name').value = '';
+            document.getElementById('patient-phone').value = '';
+            document.getElementById('patient-age').value = '';
+            document.getElementById('booking-date').value = '';
+            document.getElementById('booking-department').value = '';
+            updateDoctorsForBooking();
+            goToStep(1);
+        }
+
+        // ----------------------------------------------------
+        // Review Form Functions
+        // ----------------------------------------------------
+        function setStarRating(rating) {
+            selectedStarRating = rating;
+            const stars = document.querySelectorAll('.star-select');
+            stars.forEach((star, index) => {
+                if (index < rating) {
+                    star.classList.remove('text-slate-300');
+                    star.classList.add('text-amber-400');
+                } else {
+                    star.classList.remove('text-amber-400');
+                    star.classList.add('text-slate-300');
+                }
+            });
+        }
+
+        function submitReviewLive() {
+            const name = document.getElementById('review-name').value.trim();
+            const text = document.getElementById('review-text').value.trim();
+
+            if (!name || !text) {
+                showCustomAlert(currentLang === 'en' ? 'Please fill in your name and review text before publishing.' : 'يرجى إدخال اسمك ورسالتك قبل نشر المراجعة.');
+                return;
+            }
+
+            const wall = document.getElementById('testimonials-wall');
+            const newCard = document.createElement('div');
+            newCard.className = "testimonial-card bg-sky-50 dark:bg-slate-800 border border-blue-200 dark:border-slate-700 rounded-2xl p-6 hover:shadow-lg transition-all duration-300 transform scale-95 opacity-0";
+            
+            let starsHTML = '';
+            for (let i = 0; i < 5; i++) {
+                if (i < selectedStarRating) {
+                    starsHTML += '<i class="fa-solid fa-star"></i>';
+                } else {
+                    starsHTML += '<i class="fa-regular fa-star text-slate-300"></i>';
+                }
+            }
+
+            const firstChar = name.charAt(0).toUpperCase();
+
+            newCard.innerHTML = `
+                <div class="flex items-center gap-3 mb-4">
+                    <div class="w-10 h-10 rounded-full bg-blue-600 text-white flex items-center justify-center font-bold text-sm">${firstChar}</div>
+                    <div>
+                        <h4 class="font-bold text-sm text-slate-800 dark:text-white">${name}</h4>
+                        <span class="text-[10px] text-electricBlue font-semibold">${currentLang === 'en' ? 'Verified Patient Review' : 'مقيم على البوابة فوراً'}</span>
+                    </div>
+                </div>
+                <p class="text-sm text-slate-500 dark:text-slate-300 leading-relaxed">"${text}"</p>
+                <div class="flex text-amber-400 text-xs gap-0.5 mt-4">
+                    ${starsHTML}
+                </div>
+            `;
+
+            wall.prepend(newCard);
+            setTimeout(() => {
+                newCard.classList.remove('scale-95', 'opacity-0');
+                newCard.classList.add('scale-100', 'opacity-100');
+            }, 100);
+
+            document.getElementById('review-name').value = '';
+            document.getElementById('review-text').value = '';
+            setStarRating(5);
+        }
+
+        // ----------------------------------------------------
+        // Live Feedback Desk Functions
+        // ----------------------------------------------------
+        function submitComplaintLive() {
+            const name = document.getElementById('complaint-name').value.trim();
+            const phone = document.getElementById('complaint-phone').value.trim();
+            const type = document.getElementById('complaint-type').value;
+            const text = document.getElementById('complaint-text').value.trim();
+
+            if (!name || !phone || !text) {
+                showCustomAlert(currentLang === 'en' ? 'Please complete all required fields.' : 'يرجى ملء جميع الخانات المتاحة.');
+                return;
+            }
+
+            const list = document.getElementById('tickets-list');
+            const randomId = `NV-${Math.floor(1000 + Math.random() * 9000)}`;
+
+            const ticketItem = document.createElement('div');
+            ticketItem.className = "p-4 bg-slate-800/80 rounded-2xl border border-red-500/30 flex justify-between items-center gap-4 transform -translate-y-4 opacity-0 transition-all duration-300";
+            
+            ticketItem.innerHTML = `
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 bg-red-500/10 rounded-xl text-red-500 flex items-center justify-center"><i class="fa-solid fa-headset animate-pulse"></i></div>
+                    <div>
+                        <div class="flex items-center gap-2">
+                            <span class="font-bold text-sm text-white">Ticket #${randomId}</span>
+                            <span class="text-[9px] bg-red-500/10 text-red-500 font-extrabold px-1.5 py-0.5 rounded-md">${currentLang === 'en' ? 'Sent to Management' : 'تم إرسالها لمدير العيادة'}</span>
+                        </div>
+                        <p class="text-[11px] text-slate-400 mt-1 max-w-xs truncate">${name}: [${type}] - ${text}</p>
+                    </div>
+                </div>
+                <span class="text-[10px] text-red-400 font-bold">${currentLang === 'en' ? 'Active' : 'نشط الآن'}</span>
+            `;
+
+            list.prepend(ticketItem);
+            
+            setTimeout(() => {
+                ticketItem.classList.remove('-translate-y-4', 'opacity-0');
+            }, 100);
+
+            showCustomAlert(currentLang === 'en' 
+                ? `Ticket #${randomId} generated and logged into our patient care board.` 
+                : `تم إنشاء تذكرة برقم: ${randomId} وإرسالها لإدارة الجودة بـ نوفا كلينك، وستظهر في لوحة التتبع فورًا.`);
+
+            document.getElementById('complaint-name').value = '';
+            document.getElementById('complaint-phone').value = '';
+            document.getElementById('complaint-text').value = '';
+        }
+
+        // ----------------------------------------------------
+        // AI Health Assistant Functions
+        // ----------------------------------------------------
+        function toggleSupportChat() {
+            const win = document.getElementById('ai-chat-window');
+            if (win.classList.contains('hidden')) {
+                win.classList.remove('hidden');
+                setTimeout(() => {
+                    win.classList.remove('scale-95', 'opacity-0');
+                    win.classList.add('scale-100', 'opacity-100');
+                }, 10);
+            } else {
+                win.classList.remove('scale-100', 'opacity-100');
+                win.classList.add('scale-95', 'opacity-0');
+                setTimeout(() => {
+                    win.classList.add('hidden');
+                }, 300);
+            }
+        }
+
+        function sendChatMessage() {
+            const input = document.getElementById('chat-input');
+            const text = input.value.trim().toLowerCase();
+            if (!text) return;
+
+            const chat = document.getElementById('chat-messages');
+
+            const userMsg = document.createElement('div');
+            userMsg.className = "flex items-start gap-2.5 justify-end";
+            userMsg.innerHTML = `
+                <div class="bg-electricBlue text-white p-3 rounded-2xl rounded-tr-none leading-relaxed text-xs">
+                    ${text}
+                </div>
+            `;
+            chat.appendChild(userMsg);
+            input.value = '';
+            chat.scrollTop = chat.scrollHeight;
+
+            setTimeout(() => {
+                const replyMsg = document.createElement('div');
+                replyMsg.className = "flex items-start gap-2.5";
+                let botReply = "I am here to guide you. You can try typing keywords like (counseling, heart, teeth, children).";
+
+                if (text.includes('mental') || text.includes('anxiety') || text.includes('stress') || text.includes('counseling') || text.includes('نفسي') || text.includes('قلق')) {
+                    botReply = currentLang === 'en' 
+                        ? "We recommend booking a session with <b>Dr. Leila Abdel-Rahman</b> in our Mental Wellbeing department. Session fee is 700 EGP, payable upon arrival at the clinic."
+                        : "ننصحك بحجز جلسة دعم واستشارة نفسية مع <b>د. ليلى عبد الرحمن</b>. سعر جلستها 700 ج.م والحجز للميعاد فقط ويتم الدفع بالعيادة عند الوصول.";
+                } else if (text.includes('heart') || text.includes('chest') || text.includes('cardio') || text.includes('قلب')) {
+                    botReply = currentLang === 'en'
+                        ? "For heart or chest concerns, we advise consulting <b>Dr. Mostafa El-Shafei</b> (Cardiology). Consultation fee is 800 EGP, payable at the clinic."
+                        : "هذه الأعراض ترتبط بـ <b>عيادة القلب والأوعية الدموية</b>. ننصحك بحجز ميعاد مع د. مصطفى الشافعي (سعر الجلسة 800 ج.م والدفع بالعيادة).";
+                } else if (text.includes('teeth') || text.includes('dental') || text.includes('tooth') || text.includes('أسنان')) {
+                    botReply = currentLang === 'en'
+                        ? "You can reserve a dental slot with <b>Dr. Yasmine El-Sayegh</b>. Session fee is 600 EGP, payable in person at arrival."
+                        : "تحتاج إلى <b>عيادة طب وتجميل الأسنان</b>. دكتورة ياسمين الصايغ متواجدة بالعيادة لمساعدتك (سعر الجلسة 600 ج.م والدفع بالعيادة).";
+                } else if (text.includes('child') || text.includes('pediatric') || text.includes('baby') || text.includes('أطفال')) {
+                    botReply = currentLang === 'en'
+                        ? "Our Pediatric department is led by <b>Dr. Tarek El-Husseini</b>. Consultation fee is 500 EGP, payable upon arrival."
+                        : "القسم المتخصص هو <b>عيادة الأطفال وحديثي الولادة</b> مع الاستشاري د. طارق الحسين. سعر الكشف 500 ج.م ويتم الدفع في العيادة.";
+                }
+
+                replyMsg.innerHTML = `
+                    <div class="w-7 h-7 rounded-full bg-blue-100 dark:bg-blue-900 text-electricBlue flex items-center justify-center text-xs flex-shrink-0"><i class="fa-solid fa-robot"></i></div>
+                    <div class="bg-slate-100 dark:bg-slate-800 p-3 rounded-2xl rounded-tl-none text-slate-700 dark:text-slate-200 leading-relaxed text-xs">
+                        ${botReply}
+                    </div>
+                `;
+                chat.appendChild(replyMsg);
+                chat.scrollTop = chat.scrollHeight;
+            }, 600);
+        }
+    </script>
+</body>
+</html> 
